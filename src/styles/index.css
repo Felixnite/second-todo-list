@@ -5,7 +5,11 @@ body {
 h1 {
     text-align: center;
 }
-
+ul {
+   
+    width: 70%;
+    margin: 0px auto;
+}
 ul li {
     list-style: none;
     padding: 10px;
@@ -13,4 +17,11 @@ ul li {
 }
 input {
     border: none; width: 80%;
+}
+.task {
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
 }

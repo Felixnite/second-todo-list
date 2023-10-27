@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 //include images into your bundle
 import rigoImage from "../../img/rigo-baby.jpg";
-
+let URL_BASE= "https://playground.4geeks.com/apis/fake/todos/user/naoli"
 //create your first component
 const Home = () => {
 	const [inputValue, setInputValue] = useState({ label: "", done: false },)
@@ -10,36 +10,97 @@ const Home = () => {
 
 
 
-	const deleteTask = (id) => {
+	const deleteTask = async(id) => {
 		let newArray = todos.filter((item, index) => index !== id);
-		setTodos(newArray);
+	 try {
+		let response = await fetch(URL_BASE, {
+			method : "PUT",
+			headers :{
+				"Content-Type" : "application/json"
+			},
+			body : JSON.stringify(newArray)
+		})
+		if(response.ok){getTask()}
+	 } catch (error) {
+		console.log(error)
+		
+	 }	
 	}
-	const addTask = () => {
+	const handleChange = (event) => {
+		setInputValue({
+			...inputValue, 
+			label : event.target.value
+		})
+	}
+	const getTask = async() => {
+		try {
+			let response = await fetch(URL_BASE)
+			if (response.ok){
+				let data = await response.json()
+				setTodos (data)
+			}
+			if (response.status == 404){
+				createUser()
+			}
 
-		fetch("https://playground.4geeks.com/apis/fake/todos/user/naoli")
-			.then((response) => response.json())
-			.then((data) => setTodos(data));
+		} catch(error){
+			console.log(error)
+		}
+		
+			
+	}
+	const createUser = async() => {
+		try {
+			let response = await fetch(URL_BASE, {
+				method: "POST", 
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify([])
+			})
+			if(response.ok){
+				getTask()
+			}
+		} 
+		catch(error){
+			console.log(error)
+		}
+	}
+	
+
+	async function updateList(event) {
+		if (event.key == "Enter") {
+			try {
+				let response = await fetch(URL_BASE, {
+					method : "PUT",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body : JSON.stringify([...todos, inputValue])
+				})
+				if (response.ok) {getTask()}
+			} catch (error) {
+				console.log(error)
+			}
+		}
+		// fetch("https://playground.4geeks.com/apis/fake/todos/user/naoli", {
+		// 	method: "PUT",
+		// 	body: JSON.stringify(updatedList),
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 	},
+		// })
+		// 	.then((resp) => {
+		// 		return resp.json();
+		// 	})
+		// 	.catch((error) => {
+		// 		console.log(error);
+		// 	});
 	}
 	useEffect
 		(() => {
-			addTask();
+			getTask();
 		}, []);
-
-	function updateList(updatedList) {
-		fetch("https://playground.4geeks.com/apis/fake/todos/user/naoli", {
-			method: "PUT",
-			body: JSON.stringify(updatedList),
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((resp) => {
-				return resp.json();
-			})
-			.catch((error) => {
-				console.log(error);
-			});
-	}
 	return (
 		<div className="container">
 			<h1> My To-Do List </h1>
@@ -47,22 +108,17 @@ const Home = () => {
 				<li>
 					<input
 						type="text"
-						onChange={(e) => setInputValue(e.target.value)}
-						value={inputValue}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								setTodos(todos.concat(inputValue));
-								setInputValue("");
-							}
-						}}
+						onChange={handleChange}
+						value={inputValue.label}
+						onKeyDown={updateList}
 						placeholder="Ingresa la tarea"
 					/>
 				</li>
 				{todos.map((item, index) => (
 					<li key={item.label} className="item">
-						<span>
-							<i className="fas fa-trash" onClick={() => deleteTask(index)}></i>
+						<span className="task">
 							{item.label}
+							<i className="fas fa-trash" onClick={() => deleteTask(index)}></i>
 						</span>
 					</li>
 
@@ -70,6 +126,9 @@ const Home = () => {
 
 
 			</ul>
+			<p>
+			{todos.length > 0 ? `There are ${todos.length} tasks` : 'There are no tasks'}
+			</p>
 		</div>
 	);
 };
