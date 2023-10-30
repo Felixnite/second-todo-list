@@ -78,24 +78,30 @@ const Home = () => {
 					},
 					body : JSON.stringify([...todos, inputValue])
 				})
-				if (response.ok) {getTask()}
+				if (response.ok) {
+					getTask()
+					setInputValue({
+						label: "", done: false
+					})
+				}
 			} catch (error) {
 				console.log(error)
 			}
 		}
-		// fetch("https://playground.4geeks.com/apis/fake/todos/user/naoli", {
-		// 	method: "PUT",
-		// 	body: JSON.stringify(updatedList),
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// })
-		// 	.then((resp) => {
-		// 		return resp.json();
-		// 	})
-		// 	.catch((error) => {
-		// 		console.log(error);
-		// 	});
+	
+	}
+	const deleteAllTasks = async () => {
+		try {
+			let response = await fetch(URL_BASE, {
+				method: "DELETE"
+
+			})
+			if (response.ok) {
+				getTask()
+			}
+		} catch (error) {
+			console.log(error)
+		}
 	}
 	useEffect
 		(() => {
@@ -128,6 +134,9 @@ const Home = () => {
 			</ul>
 			<p>
 			{todos.length > 0 ? `There are ${todos.length} tasks` : 'There are no tasks'}
+			</p>
+			<p>
+				<button className= "btn btn-danger mt-5" onClick= {() => deleteAllTasks()}>Delete All</button>
 			</p>
 		</div>
 	);
